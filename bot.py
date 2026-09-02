@@ -20,6 +20,12 @@ load_dotenv()
 BOT_TOKEN = os.getenv("8827894702:AAFzGUh4Dl_O_nMHUvNA6W--peTSjCA7JbY")
 GEMINI_API_KEY = os.getenv("AIzaSyCUzOtvczb4Clcc8bla4kBq9YJJci6uAV0")
 
+if not BOT_TOKEN:
+    raise ValueError("ПОМИЛКА: Змінна BOT_TOKEN відсутня в Environment Variables на Render!")
+
+if not GEMINI_API_KEY:
+    raise ValueError("ПОМИЛКА: Змінна GEMINI_API_KEY відсутня в Environment Variables на Render!")
+
 # Ініціалізація клієнтів
 client = genai.Client(api_key=GEMINI_API_KEY)
 bot = Bot(token=BOT_TOKEN)
