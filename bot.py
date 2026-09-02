@@ -125,7 +125,7 @@ async def process_preferences(message: types.Message, state: FSMContext):
     )
 
     # Список моделей для почергової спроби
-    candidate_models = ["gemini-3.6-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+    candidate_models = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-1.5-flash"]
     response = None
 
     for model_name in candidate_models:
