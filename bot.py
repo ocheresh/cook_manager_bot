@@ -14,14 +14,15 @@ from google import genai
 from google.genai import types as genai_types
 from aiohttp import web
 
-# Завантаження змінних середовища
+# Завантаження змінних середовища з файлу .env (для локального запуску)
 load_dotenv()
 
-BOT_TOKEN = os.getenv("8827894702:AAFzGUh4Dl_O_nMHUvNA6W--peTSjCA7JbY")
-GEMINI_API_KEY = os.getenv("AIzaSyCUzOtvczb4Clcc8bla4kBq9YJJci6uAV0")
+# Передаємо НАЗВИ змінних середовища з панелі Render
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# if not BOT_TOKEN:
-#     raise ValueError("ПОМИЛКА: Змінна BOT_TOKEN відсутня в Environment Variables на Render!")
+if not BOT_TOKEN:
+    raise ValueError("ПОМИЛКА: Змінна BOT_TOKEN відсутня в Environment Variables на Render!")
 
 if not GEMINI_API_KEY:
     raise ValueError("ПОМИЛКА: Змінна GEMINI_API_KEY відсутня в Environment Variables на Render!")
@@ -35,7 +36,7 @@ dp.include_router(router)
 
 logging.basicConfig(level=logging.INFO)
 
-# --- ВЕБ-СЕРВЕР ДЛЯ ВЕРЕДЛИВОГО RENDER (KEEP-ALIVE) ---
+# --- ВЕБ-СЕРВЕР ДЛЯ KEEP-ALIVE НА RENDER ---
 async def handle_ping(request):
     return web.Response(text="Bot is running and healthy!")
 
