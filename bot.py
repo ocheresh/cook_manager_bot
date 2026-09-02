@@ -125,7 +125,7 @@ async def process_preferences(message: types.Message, state: FSMContext):
     try:
         # Актуальна модель gemini-2.5-flash
         response = await client.aio.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=user_prompt,
             config=genai_types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
