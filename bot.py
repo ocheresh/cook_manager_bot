@@ -123,8 +123,9 @@ async def process_preferences(message: types.Message, state: FSMContext):
     )
 
     try:
+        # Використовуємо стабільну модель gemini-2.0-flash
         response = await client.aio.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-2.0-flash",
             contents=user_prompt,
             config=genai_types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
@@ -134,17 +135,18 @@ async def process_preferences(message: types.Message, state: FSMContext):
 
         result_text = response.text
 
-        # Розбивка довгого повідомлення (ліміт Telegram 4096 символів)
+        # Відправляємо без parse_mode="HTML", щоб уникнути помилок синтаксису Telegram
         if len(result_text) > 4000:
             for x in range(0, len(result_text), 4000):
-                await message.answer(result_text[x:x+4000], parse_mode="HTML")
+                await message.answer(result_text[x:x+4000])
         else:
-            await message.answer(result_text, parse_mode="HTML")
+            await message.answer(result_text)
 
         await message.answer("Щоб скласти нове меню, введіть команду /start")
 
     except Exception as e:
-        logging.error(f"Помилка при запиті до Gemini API: {e}")
+        # Виводимо точний текст помилки в консоль Render для діагностики
+        logging.error(f"Деталі помилки: {e}", exc_info=True)
         await message.answer("⚠️ Сталася помилка під час генерації. Перевірте API ключ та спробуйте ще раз (/start).")
 
     await state.clear()
