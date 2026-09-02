@@ -124,20 +124,33 @@ async def process_preferences(message: types.Message, state: FSMContext):
         f"Особливі побажання та обмеження:\n{preferences}"
     )
 
-    try:
-        # Актуальна модель gemini-2.5-flash
-        response = await client.aio.models.generate_content(
-            model="gemini-3.6-flash",
-            contents=user_prompt,
-            config=genai_types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                temperature=0.7,
-            )
-        )
+    # Список моделей для почергової спроби
+    candidate_models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+    response = None
 
+    for model_name in candidate_models:
+        for attempt in range(2):  # 2 спроби для кожної моделі
+            try:
+                response = await client.aio.models.generate_content(
+                    model=model_name,
+                    contents=user_prompt,
+                    config=genai_types.GenerateContentConfig(
+                        system_instruction=SYSTEM_PROMPT,
+                        temperature=0.7,
+                    )
+                )
+                if response and response.text:
+                    break
+            except Exception as e:
+                logging.warning(f"Спроба {attempt + 1} для моделі {model_name} не вдалася: {e}")
+                await asyncio.sleep(2)  # Пауза 2 секунди перед наступною спробою
+        
+        if response and response.text:
+            break
+
+    if response and response.text:
         result_text = response.text
 
-        # Відправка без parse_mode="HTML", щоб Telegram не видавав помилок синтаксису
         if len(result_text) > 4000:
             for x in range(0, len(result_text), 4000):
                 await message.answer(result_text[x:x+4000])
@@ -145,14 +158,11 @@ async def process_preferences(message: types.Message, state: FSMContext):
             await message.answer(result_text)
 
         await message.answer("Щоб скласти нове меню, введіть команду /start")
-
-    except Exception as e:
-        # Вивід логів для діагностики на Render
-        logging.error(f"Деталі помилки: {e}", exc_info=True)
-        await message.answer("⚠️ Сталася помилка під час генерації. Перевірте API ключ та спробуйте ще раз (/start).")
+    else:
+        await message.answer("⚠️ Сервери Google зараз перевантажені. Будь ласка, спробуйте ще раз через 1-2 хвилини (/start).")
 
     await state.clear()
-
+    
 async def main():
     await start_web_server()
     await dp.start_polling(bot)
