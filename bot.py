@@ -69,7 +69,7 @@ SYSTEM_PROMPT = """
 3. Склади список продуктів до купівлі, яких НЕМАЄ вдома.
 4. Вкажи орієнтовні ціни на ринку/в супермаркетах України (в грн).
 
-Оформи відповідь чітко із використанням HTML-тегів (<b>, <i>, <code>):
+Оформи відповідь чітко та структуровано (використовуй емодзі та стандартний текст без складних тегів):
 - Меню по днях (Пн-Нд: Сніданок, Обід, Вечеря).
 - Список покупок за категоріями з вагою та орієнтовною ціною.
 - Загальний бюджет на тиждень.
@@ -123,9 +123,9 @@ async def process_preferences(message: types.Message, state: FSMContext):
     )
 
     try:
-        # Використовуємо стабільну модель gemini-2.0-flash
+        # Актуальна модель gemini-2.5-flash
         response = await client.aio.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=user_prompt,
             config=genai_types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
@@ -135,7 +135,7 @@ async def process_preferences(message: types.Message, state: FSMContext):
 
         result_text = response.text
 
-        # Відправляємо без parse_mode="HTML", щоб уникнути помилок синтаксису Telegram
+        # Відправка без parse_mode="HTML", щоб Telegram не видавав помилок синтаксису
         if len(result_text) > 4000:
             for x in range(0, len(result_text), 4000):
                 await message.answer(result_text[x:x+4000])
@@ -145,7 +145,7 @@ async def process_preferences(message: types.Message, state: FSMContext):
         await message.answer("Щоб скласти нове меню, введіть команду /start")
 
     except Exception as e:
-        # Виводимо точний текст помилки в консоль Render для діагностики
+        # Вивід логів для діагностики на Render
         logging.error(f"Деталі помилки: {e}", exc_info=True)
         await message.answer("⚠️ Сталася помилка під час генерації. Перевірте API ключ та спробуйте ще раз (/start).")
 
